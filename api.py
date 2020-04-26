@@ -32,6 +32,10 @@ def home():
             <p>Thanks for visiting</p>
             <footer><p>Created by Trofogol for education purposes. No contacts provided.</p></footer>"""
 
+@app.errorhandler(404)
+def not_found(exc):
+    return '<h1>Not found (404)</h1><h3>There is no such address or method, check URL and try again</h3>' + '<p>exc == "' + str(exc) + '"</p>'
+
 @app.route('/samplelist', methods=['GET'])
 def list():
     """
@@ -76,7 +80,7 @@ def get_book():
 
 # finally, work with real database
 @app.route('/mysql/offices/all', methods=['GET'])
-def ofiices():
+def offices():
     """
     return all entries from books [TODO: in html table format]
     or in json format (must be requested explicitly)
@@ -119,6 +123,6 @@ def ofiices():
         pretty_result += '</table>'
         return pretty_result
 
-
+# run api
 #app.run()                  # localhost visible
 app.run(host='0.0.0.0', port='8080')    # externally visible
