@@ -1,10 +1,11 @@
 pipeline {
     agent any
     stages {
-        stage('build') {
+        stage('jenkins test') {
             steps {
-		sh 'echo "checking python version"'
-                sh 'python3 --version'
+		sh '''echo "Checking work directory on build stage"'
+                      pwd
+                '''
             }
         }
     }
