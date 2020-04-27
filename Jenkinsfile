@@ -3,7 +3,7 @@ pipeline {
     stages {
         stage('jenkins test') {
             steps {
-		sh '''echo "Checking work directory on build stage"'
+		sh '''echo "Checking work directory on build stage"
                       pwd
                 '''
             }
