@@ -6,7 +6,8 @@ pipeline {
                 // since working directory is cloned repository's folder,
                 // I use local path:
                 // set virtual environment
-                sh '''if [ ! -d "venv"] then
+                sh '''if [ ! -d "venv"] 
+                      then
                       python3 -m venv venv
                       fi
                       . venv/bin/activate
