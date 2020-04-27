@@ -8,7 +8,7 @@ pipeline {
                 // create virtual environment 'venv' in repo directory
                 sh 'python3 -m venv venv'    
                 // activate it
-                sh 'source venv/bin/activate'
+                sh 'bash source venv/bin/activate'
                 // and install necessary modules
                 sh 'pip3 install flask pymysql cryptography pyyaml'
             }
