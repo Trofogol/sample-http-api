@@ -8,12 +8,20 @@ Still, there is a small chance that it will evolve in something useful.
 
 - Python3
 
-### python3 installed modules
+#### python3 installed modules
 
-- flask
-- pymysql
-- cryptography
-- pyyaml
+- pip
+- venv (or virualenv)
+
+## Installation
+
+> *NOTE: use "venv" as the name of virtual environment directory (as below) — it's already declared in .gitignore so you won't have to edit this file*
+
+        $ git clone <repo link>
+        $ cd sample-http-api
+        $ python3 -m venv venv    # venv module usage, use virtualenv here if you want
+        $ . venv/bin/activate
+        (venv)$ python3 -m pip install -r requirements.txt
 
 #### Author
 

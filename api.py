@@ -125,4 +125,4 @@ def offices():
 
 # run api
 #app.run()                  # localhost visible
-app.run(host='0.0.0.0', port='8080')    # externally visible
+app.run(host='0.0.0.0', port=conf['api']['port'])    # externally visible
