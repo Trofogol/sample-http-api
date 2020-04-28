@@ -11,7 +11,7 @@ pipeline {
                       python3 -m venv venv
                       fi
                       . venv/bin/activate
-                      pip3 install flask pymysql cryptography pyyaml
+                      python3 -m pip install -r requirements.txt
                    '''
             }
         }
