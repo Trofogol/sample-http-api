@@ -1,0 +1,1 @@
+curl http://localhost:8080/git/notifyCommit?url=/home/trofogol/python_projects/local-sample-api
