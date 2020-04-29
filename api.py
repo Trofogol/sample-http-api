@@ -7,10 +7,29 @@ with open('config.yml') as confile:
     try:
         conf = yaml.safe_load(confile)
     except yaml.YAMLError as exception:
-        print("Something went wrong, couldn't parse config.yml")
+        print(f"Something went wrong, couldn't parse config.yml correctly: {exception}")
 
 app = Flask(__name__)
 #app.config["DEBUG"] = True
+
+def exec_mysql(query):
+    """
+    execute query on mysql database which is defined in config.yml
+    """
+    # shorten mysql config variable name for better readability
+    mysql = conf['databases']['mysql']
+
+    # connect to database
+    with pymysql.connect(mysql['address'],mysql['login'],mysql['password'],mysql['database'],mysql['port']) as db:
+        # here happened some magic
+        # looks like  __start__ method includes connector creation
+        # so db eventually became cursor, not connector
+        db.execute(query) # execute query
+        result = db.fetchall() # save data for return
+
+    # I placed return statement out of "with" to make sure that all clean-up
+    # jobs is completed
+    return result
 
 @app.route('/', methods=['GET'])
 # name of next function means nothing, because it will be invoked by
@@ -19,6 +38,8 @@ def home():
     """
     home page that binded to root address (primary FQDN w/o any path after it)
     """
+    # NB! keep data below actual
+    #TODO: move it to external file
     return """<h1>Sample api engine</h1>
             <p>This is a home page of sample API engine. API methods:<br>
             <ul>
@@ -26,11 +47,15 @@ def home():
             <li><i>/books/all</i> - return full sample list of books in JSON format</li>
             <li><i>/books?id={int}</i> - return book from sample list by id in JSON format</li>
             <li><i>/mysql/offices/all</i> - return full mysql table "offices"</li>
+            <li><i>/mysql/offices?name={string}</i> - get office by specified name</li>
             </ul>
             and some more methods on the way.
             </p>
-            <p>Thanks for visiting</p>
-            <footer><p>Created by Trofogol for education purposes. No contacts provided.</p></footer>"""
+            <p>______________________________________</p>
+            <p>* - there are data types in braces. To form correct request, just put required data there (also remove braces).</p>
+            <footer style="border-top: double;">
+            <p>Created by Trofogol for education purposes. GitHub: <a href=https://github.com/Trofogol>Trofogol</a></p>
+            </footer>"""
 
 @app.errorhandler(404)
 def not_found(exc):
@@ -80,23 +105,14 @@ def get_book():
 
 # finally, work with real database
 @app.route('/mysql/offices/all', methods=['GET'])
-def offices():
+def all_offices():
     """
-    return all entries from books [TODO: in html table format]
+    return all entries from books
     or in json format (must be requested explicitly)
     """
-    # shorten mysql config var name
-    mysql = conf['databases']['mysql']
     
-    # connect to database
-    with pymysql.connect(mysql['address'],mysql['login'],mysql['password'],mysql['database'],mysql['port']) as db:
-        # here happened some magic (probably __start__ method includes connector creation)
-        # so db eventually became cursor, not connector
-        # execute query
-        db.execute('SELECT * FROM offices')    # hardcoded (don't do that)
-        
-        # save raw data for return
-        result = db.fetchall()
+    # save result of query 'SELECT * from offices' to result var
+    result = exec_mysql('SELECT * from offices')
 
     # now check query arguments (look for "format")
     if 'format' in request.args:
@@ -119,10 +135,20 @@ def offices():
                 pretty_result += '<td>' + str(column) + '</td>'
             # close row tag
             pretty_result += '</tr>'
-        # close table tag
-        pretty_result += '</table>'
+        # close table tag and add info about JSON format
+        pretty_result += '</table><p>You can get this result in JSON format. Just specify format=json as query parameter (add it after ? in address string)</p>'
         return pretty_result
 
+@app.route('/mysql/offices', methods=['GET'])
+def office():
+    """
+    return specified row (defined by name) from offices table
+    """
+    if 'name' in request.args:
+        result = exec_mysql('SELECT * from offices WHERE name = "' + request.args['name'] + '";')
+        return jsonify(result)
+    else:
+        return '<p>Sorry, I need to know name of office. Please specify it by adding "?name=office_name" (w/o quotes) at the end of URL</p>'
+
 # run api
-#app.run()                  # localhost visible
-app.run(host='0.0.0.0', port=conf['api']['port'])    # externally visible
+app.run(host='0.0.0.0', port=conf['api']['port'])    # externally visible (if debug mode is disabled)
