@@ -16,5 +16,13 @@ pipeline {
                    '''
             }
         }
+        stage('unit tests') {
+            steps {
+                sh '''
+                      . venv/bin/activate
+                      python3 sample_unittest.py
+                   '''
+            }
+        }
     }
 }

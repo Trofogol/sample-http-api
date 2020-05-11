@@ -1,13 +1,33 @@
 from flask import Flask, jsonify, request
-import json, yaml # data (de)serializers
-import pymysql    # database frameworks
+import json, yaml # data (de)serializer(s)
+import pymysql    # database framework(s)
 
 # read config from config.yml file and save in conf variable
 with open('config.yml') as confile:
     try:
         conf = yaml.safe_load(confile)
     except yaml.YAMLError as exception:
-        print("Something went wrong, couldn't parse config.yml")
+        print(f"Something went wrong, couldn't parse config.yml correctly: {exception}")
+
+def exec_mysql(query):
+    """
+    execute SQL query on mysql database which is defined in config.yml
+    """
+    # shorten mysql config variable name for better readability
+    mysql = conf['databases']['mysql']
+
+    # connect to database
+    with pymysql.connect(mysql['address'],mysql['login'],mysql['password'],mysql['database'],mysql['port']) as db:
+        # here happened some magic
+        # looks like  __start__ method includes connector creation
+        # so db eventually became cursor, not connector 
+        # (as it described in PyMySQL docs' example)
+        db.execute(query) # execute query
+        result = db.fetchall() # save data for return
+
+    # I placed return statement out of "with" to make sure that all clean-up
+    # jobs is completed
+    return result
 
 # name of this variable is used on every api method (e.g. app.route)
 # and must be defined for WSGI server to use
@@ -21,18 +41,28 @@ def home():
     """
     home page that binded to root address (primary FQDN w/o any path after it)
     """
+    # NB! keep data below actual
+    #TODO: move it to external file
     return """<h1>Sample api engine</h1>
             <p>This is a home page of sample API engine. API methods:<br>
             <ul>
-            <li><i>/samplelist</i> - return sample list in JSON format</li>
-            <li><i>/books/all</i> - return full sample list of books in JSON format</li>
-            <li><i>/books?id={int}</i> - return book from sample list by id in JSON format</li>
+            <li><i>/samplelist</i> - return sample list[1] in JSON format</li>
+            <li><i>/books/all</i> - return full sample list of books[2] in JSON format</li>
+            <li><i>/books?id={int*}</i> - return book[2] from sample list by id in JSON format</li>
             <li><i>/mysql/offices/all</i> - return full mysql table "offices"</li>
+            <li><i>/mysql/offices?name={string*}</i> - get office by specified name</li>
+            <li><i>/mysql/workstations?office={string*}</i> - get workstations by specified office name (also possible to use id={int*} parameter)</li>
+            <li><i>/mysql/employees?name={string*}</i> - get employee by specified name, office or id</li>
             </ul>
             and some more methods on the way.
             </p>
-            <p>Thanks for visiting</p>
-            <footer><p>Created by Trofogol for education purposes. No contacts provided.</p></footer>"""
+            <p>______________________________________</p>
+            <p>* - there are data types in braces. To form correct request, just put required data there (also remove braces).</p>
+            <p>1 - imported from JSON file</p>
+            <p>2 - hardcoded list</p>
+            <footer style="border-top: double;">
+            <p>Created by Trofogol for education purposes. GitHub: <a href=https://github.com/Trofogol>Trofogol</a></p>
+            </footer>"""
 
 @app.errorhandler(404)
 def not_found(exc):
@@ -81,24 +111,61 @@ def get_book():
     return jsonify(results)
 
 # finally, work with real database
-@app.route('/mysql/offices/all', methods=['GET'])
-def offices():
-    """
-    return all entries from books [TODO: in html table format]
-    or in json format (must be requested explicitly)
-    """
-    # shorten mysql config var name
-    mysql = conf['databases']['mysql']
+@app.route('/mysql/workstations', methods=['GET'])
+def station():
+    """return specific workstation, defined by id or office"""
+    # form beggining of sql query
+    sql_query = 'SELECT id, hostname, address, office, equipment, last_service from employees WHERE '
+
+    # check html query arguments separately
+    # and append appropriate parameters to sql query
+    if ('id' in request.args) or ('office' in request.args):
+        if 'id' in request.args:
+            sql_query += ' id = "' + request.args['id'] + '"'
+        if 'office' in request.args:
+            sql_query += ' office = "' + request.args['office'] + '"'
+    else:
+        return '<p>Sorry, I need to know at least one of this parameters: id or office. Please specify it (or them) in URL request (after "?")</p>'
     
-    # connect to database
-    with pymysql.connect(mysql['address'],mysql['login'],mysql['password'],mysql['database'],mysql['port']) as db:
-        # here happened some magic (probably __start__ method includes connector creation)
-        # so db eventually became cursor, not connector
-        # execute query
-        db.execute('SELECT * FROM offices')    # hardcoded (don't do that)
-        
-        # save raw data for return
-        result = db.fetchall()
+    # execute query and save raw result
+    result = exec_mysql(sql_query + ';')
+    # return result as JSON
+    return jsonify(result)
+
+@app.route('/mysql/employees', methods=['GET'])
+def employee():
+    """return specific eployee(s), specified by id, name or office"""
+    # form beggining of sql query
+    sql_query = 'SELECT id, name, office, position, birth_date, hire_date FROM employees WHERE '
+
+    # check html query arguments separately
+    # and append appropriate parameters to sql query
+    if ('id' in request.args) or ('name' in request.args) or ('office' in request.args):
+        if 'id' in request.args:
+            sql_query += ' id = "' + request.args['id'] + '"'
+        if 'name' in request.args:
+            # name will check containment of character sequence
+            # this allows user to find, for example, all Simons in table
+            sql_query += ' name LIKE "%' + request.args['name'] + '%"'
+        if 'office' in request.args:
+            sql_query += ' office = "' + request.args['office'] + '"'
+    else:
+        return '<p>Sorry, I need to know at least one of this parameters: id, name or office. Please specify it (or them) in URL request (after "?")</p>'
+
+    # execute query and save raw result
+    result = exec_mysql(sql_query + ';')
+    # return result as JSON
+    return jsonify(result)
+
+@app.route('/mysql/offices/all', methods=['GET'])
+def all_offices():
+    """
+    return (html) all rows from offices table and get names of their managers
+    json format may be requested explicitly
+    """
+    
+    # save result of query 'SELECT * from offices' to result var
+    result = exec_mysql('SELECT offices.name, address, employees.name AS manager, phone FROM offices JOIN employees ON offices.manager = employees.id;')
 
     # now check query arguments (look for "format")
     if 'format' in request.args:
@@ -109,22 +176,33 @@ def offices():
         # probably not the best implementation, but it's pretty short for current version
         else:
             # return error about format parameter
-            return 'Sorry, only html (no query args) or json formats available (not "' + request.args['format'] + '"'
+            return 'Sorry, only html (no query args) or json formats available (not "' + request.args['format'] + '")'
     else:
         # default format is html, so let's form a table
-        pretty_result = '<style>table, th, td {border: 1px solid black;}</style><table>'
+        html_result = '<style>table, th, td {border: 2px solid black;}</style><table>'
         for row in result:
             # form table row
-            pretty_result += '<tr>'
+            html_result += '<tr>'
             for column in row:
                 # form table column (cell)
-                pretty_result += '<td>' + str(column) + '</td>'
+                html_result += '<td>' + str(column) + '</td>'
             # close row tag
-            pretty_result += '</tr>'
-        # close table tag
-        pretty_result += '</table>'
-        return pretty_result
+            html_result += '</tr>'
+        # close table tag and add info about JSON format
+        html_result += '</table><p>You can get this result in JSON format (you will get IDs of managers instead of names). Just specify format=json as query parameter (add it after ? in address string)</p>'
+        return html_result
+
+@app.route('/mysql/offices', methods=['GET'])
+def office():
+    """
+    return specified row (defined by name) from offices table
+    """
+    if 'name' in request.args:
+        result = exec_mysql('SELECT * from offices WHERE name LIKE "%' + request.args['name'] + '%";')
+        return jsonify(result)
+    else:
+        return '<p>Sorry, I need to know name of office. Please specify it by adding "?name=office_name" (w/o quotes) at the end of URL</p>'
 
 # run api
-#app.run()                  # localhost visible
-app.run(host='0.0.0.0', port=conf['api']['port'])    # externally visible "single request" mode
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=conf['api']['port'])    # externally visible "single request" mode (if debug mode is disabled)
