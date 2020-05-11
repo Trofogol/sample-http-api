@@ -9,6 +9,8 @@ with open('config.yml') as confile:
     except yaml.YAMLError as exception:
         print("Something went wrong, couldn't parse config.yml")
 
+# name of this variable is used on every api method (e.g. app.route)
+# and must be defined for WSGI server to use
 app = Flask(__name__)
 #app.config["DEBUG"] = True
 
@@ -125,4 +127,4 @@ def offices():
 
 # run api
 #app.run()                  # localhost visible
-app.run(host='0.0.0.0', port=conf['api']['port'])    # externally visible
+app.run(host='0.0.0.0', port=conf['api']['port'])    # externally visible "single request" mode
