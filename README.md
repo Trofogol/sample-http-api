@@ -44,7 +44,9 @@ Install uWSGI as module inside environment
 
 and run uWSGI with command
 
-    $ uwsgi --socket 0.0.0.0:3031 --wsgi-file api.py --callable app --processes 4 --threads 2 --stats 0.0.0.0:9191
+    $ uwsgi --wsgi-file api.py --callable app --processes 4 --threads 2 --http 0.0.0.0:9191
+
+> Useful flags for `uwsgi`: `--socket <address>:<port>` (for proxy, e.g. nginx); `--stats <address>:<port>` (get server stats)
 
 ## Author
 
