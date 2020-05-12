@@ -1,0 +1,13 @@
+Source: sample-http-api
+Section: python
+Priority: extra
+Maintainer: Trofogol <nickb.ufeim@gmail.com>
+Build-Depends: debhelper(>=9), python3, dh-virtualenv (>=0.8)
+Standards-Version: 3.9.5
+
+Package: sample-http-api
+Architecture: any
+Pre-Depends: dpkg (>= 1.16.1), python3, ${misc: Pre-Depends}
+Depends: ${mist:Depends}
+Description: Sample http api application by Trofogol. Almost useless as is.
+    Made for self-education.
