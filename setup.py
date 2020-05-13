@@ -2,14 +2,14 @@ from setuptools import setup, find_packages
 
 setup(
         name="sample-http-api",
-        version="0.1"
+        version="0.1",
         packages=find_packages(),
         scripts=["api.py", "raw.py"],
 
         package_data={
             # include yaml config file and json data file
             "": ["config.yml", "data.json"]
-        }
+        },
 
         # metadata 
         # (not necessary here: I do not intend to upload this package anywhere)
