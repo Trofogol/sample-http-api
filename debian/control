@@ -7,7 +7,7 @@ Standards-Version: 3.9.5
 
 Package: sample-http-api
 Architecture: any
-Pre-Depends: dpkg (>= 1.16.1), python3, ${misc: Pre-Depends}
+Pre-Depends: dpkg (>= 1.16.1), python3
 Depends: ${misc:Depends}
 Description: Sample http api application by Trofogol. Almost useless as is.
     Made for self-education.
