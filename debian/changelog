@@ -1,7 +1,5 @@
-sample-http-api (0.1-1) UNSTABLE; urgency=low
+sample-http-api (0.1-1) UNRELEASED; urgency=low
 
   * Initial release. (Closes: #XXXXXX)
 
  --Trofogol <nickb.ufeim@gmail.com>  Wed, 13 May 2020 09:25:50 +0300
-
-
