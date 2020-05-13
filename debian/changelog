@@ -1,5 +1,5 @@
-sample-http-api (0.1-1) unstable; urgency=low
+PACKAGE (VERSION) UNSTABLE; urgency=low
 
-  * Initial package release
+  * Initial release. (Closes: #XXXXXX)
 
-  -- Trofogol <nickb.ufeim@gmail.com> Tue, 12 May 2020 17:00:00 +0300
+ --Trofogol <nickb.ufeim@gmail.com>  Wed, 13 May 2020 09:25:50 +0300
