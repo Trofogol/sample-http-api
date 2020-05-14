@@ -1,5 +1,5 @@
 import unittest, pymysql    # pymysql is imported for exception
-from api import exec_mysql
+import api
 
 class SampleTest(unittest.TestCase):
     def test_query(self):
@@ -10,11 +10,12 @@ class SampleTest(unittest.TestCase):
         # correct query check
         request = 'SELECT * FROM offices WHERE name = "definetly not exists";'
         empty_answer = ()
-        self.assertEqual (exec_mysql(request), empty_answer)
+        # expect empty answer w/o any errors
+        self.assertEqual (api.exec_mysql(request), empty_answer)
         
         # incorrect query (exception) check
-        with self.assertRaises(pymysql.err.ProgrammingError):
-            exec_mysql('SELUCT + FRUM offices WHAT? NAAH;')
+        with self.assertRaises(pymysql.err.ProgrammingError):  # (expect error when SQL syntax is violated)
+            api.exec_mysql('SELUCT + FRUM offices WHAT? NAAH;')
 
 if __name__ == '__main__':
     unittest.main()

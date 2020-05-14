@@ -24,5 +24,8 @@ pipeline {
                    '''
             }
         }
+        // here (after build and tests) might be 'packaging' stage: form package for deploy
+        // I don't think that this project can be effectively deployed
+        // by this way
     }
 }
