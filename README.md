@@ -48,6 +48,14 @@ and run uWSGI with command
 
 > Useful flags for `uwsgi`: `--socket <address>:<port>` (for proxy, e.g. nginx); `--stats <address>:<port>` (get server stats)
 
-## Author
+### Debian package
 
-Nick Belousov a.k.a. Trofogol
+**Unpacking does not work properly, this section is TODO note**
+
+This project has been debianized to be packed in Debian package. However, 
+I still don't understand how to organize project layout to get access to unpacked version.
+
+***TODO:***
+- fully understand python packaging by [setuptools](https://setuptools.readthedocs.io/en/latest/setuptools.html)
+ (also read [legacy docs](https://docs.python.org/3/distutils/): setuptools' docs could lack some info)
+- rework project layout and scripts to make them work and accessible after unpacking

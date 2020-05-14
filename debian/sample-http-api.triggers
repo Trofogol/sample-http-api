@@ -1,0 +1,9 @@
+# Register interest in Python interpreter; and don't make the Python3 package
+# dependent on the venv/virtualenv package (any of them)
+# processing (noawait)
+interest-noawait /usr/bin/python3
+
+# Also provide a symbolic trigger for all dh-virtualenv packages
+interest dh-virtualenv-interpreter-update
+
+
