@@ -5,12 +5,13 @@ pipeline {
             steps {
                 // since working directory is cloned repository's folder,
                 // I use local path:
-                // set virtual environment
+                // set virtual environment and remove previous (if any)
                 sh '''
-                      if [ ! -d venv ]
+                      if [ -d venv ]
                       then
-                              python3 -m venv venv
+                              rm -r venv
                       fi
+                      python3 -m venv venv
                       . venv/bin/activate
                       python3 -m pip install -r requirements.txt
                    '''
