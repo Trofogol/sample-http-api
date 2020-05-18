@@ -4,6 +4,8 @@ This is a sample web API written on Python3 with flask framework.
 There is no adequate usage for this API, because it was made only for my education.
 Still, there is a small chance that it will evolve in something useful.
 
+> This [Vagrant project](https://github.com/Trofogol/vagrant-api-environment) builds and launch it automatically.
+
 ## Requirements
 
 - Python3
