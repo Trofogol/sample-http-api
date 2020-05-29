@@ -115,7 +115,7 @@ def get_book():
 def station():
     """return specific workstation, defined by id or office"""
     # form beggining of sql query
-    sql_query = 'SELECT id, hostname, address, office, equipment, last_service from employees WHERE '
+    sql_query = 'SELECT id, hostname, address, office, equipment, last_service from workstations WHERE '
 
     # check html query arguments separately
     # and append appropriate parameters to sql query
@@ -123,7 +123,7 @@ def station():
         if 'id' in request.args:
             sql_query += ' id = "' + request.args['id'] + '"'
         if 'office' in request.args:
-            sql_query += ' office = "' + request.args['office'] + '"'
+            sql_query += ' office LIKE "%' + request.args['office'] + '%"'
     else:
         return '<p>Sorry, I need to know at least one of this parameters: id or office. Please specify it (or them) in URL request (after "?")</p>'
     
@@ -148,7 +148,7 @@ def employee():
             # this allows user to find, for example, all Simons in table
             sql_query += ' name LIKE "%' + request.args['name'] + '%"'
         if 'office' in request.args:
-            sql_query += ' office = "' + request.args['office'] + '"'
+            sql_query += ' office LIKE "%' + request.args['office'] + '%"'
     else:
         return '<p>Sorry, I need to know at least one of this parameters: id, name or office. Please specify it (or them) in URL request (after "?")</p>'
 
