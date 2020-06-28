@@ -1,6 +1,6 @@
 ---
 api: 
-  port: 4444
+  port: 4444                    # singleuser mode (api.py explicit launch)
 databases: 
   mysql: 
     address: "127.0.0.1"
